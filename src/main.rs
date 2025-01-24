@@ -315,12 +315,40 @@ fn generate_qr_with_overlay(version: u8, message: &str) -> Result<(), String> {
     Ok(())
 }
 
+fn generate_fake_qr(version: u8, qr_message: &str, overlay_message: &str) -> Result<(), String> {
+    let qr_code = generate_base_qr(version, qr_message)?;
+    let mut qr_image = qr_code
+        .render::<Luma<u8>>()
+        .module_dimensions(1, 1)
+        .quiet_zone(false)
+        .build();
+
+    let width = qr_image.width() - 1;
+    let overlay_bits = calculate_overlay_bits(overlay_message);
+
+    add_overlay_to_qr(&mut qr_image, &overlay_bits, width);
+
+    qr_image
+        .save("fake_qr_with_separator_overlay.png")
+        .map_err(|_| "Failed to save the QR code with overlay".to_string())?;
+    println!("Fake QR code with separator overlay saved as 'fake_qr_with_separator_overlay.png'.");
+    Ok(())
+}
+
 fn main() {
     let message = "Enter message to encode in QR";
     let qr_version = 6;
 
     match generate_qr_with_overlay(qr_version, message) {
         Ok(_) => println!("QR code generation succeeded ✅"),
+        Err(e) => println!("Error: {} ❌", e),
+    }
+
+    let qr_message = "Enter message to encode in QR";
+    let overlay_message = "Incorrect overlay message";
+    let qr_version = 6;
+    match generate_fake_qr(qr_version, qr_message, overlay_message) {
+        Ok(_) => println!("Fake QR code generation succeeded ✅"),
         Err(e) => println!("Error: {} ❌", e),
     }
 }
