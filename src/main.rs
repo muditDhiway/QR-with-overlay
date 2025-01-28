@@ -3,9 +3,10 @@ use qrcode::{EcLevel, QrCode, Version};
 use sha2::{Digest, Sha256};
 
 fn generate_base_qr(version: u8, message: &str) -> Result<QrCode, String> {
-    if version < 3 || version > 40 {
+    if version < 1 || version > 40 {
         return Err("Version must be between 3 and 40".to_string());
     }
+
     QrCode::with_version(message, Version::Normal(version.into()), EcLevel::H)
         .map_err(|_| "Failed to generate QR code".to_string())
 }
@@ -173,8 +174,14 @@ fn generate_fake_qr(version: u8, qr_message: &str, overlay_message: &str) -> Res
 }
 
 fn main() {
+    // for version 1, message length can be a max of 7
+    // for version 2, message length can be a max of 14
+    // for version 3, message length can be a max of 24
+    // for version 4, message length can be a max of 34
+    // for version 5, message length can be a max of 44
+
     let message = "Enter message to encode in QR";
-    let qr_version = 6;
+    let qr_version = 5;
 
     match generate_qr_with_overlay(qr_version, message) {
         Ok(_) => println!("QR code generation succeeded ✅"),
@@ -183,7 +190,7 @@ fn main() {
 
     let qr_message = "Enter message to encode in QR";
     let overlay_message = "Incorrect overlay message";
-    let qr_version = 6;
+    let qr_version = 30;
     match generate_fake_qr(qr_version, qr_message, overlay_message) {
         Ok(_) => println!("Fake QR code generation succeeded ✅"),
         Err(e) => println!("Error: {} ❌", e),
